@@ -130,6 +130,48 @@ def serialize_preferred_area(pref):
     }
 
 
+def serialize_teacher(teacher):
+    return {
+        "id": teacher.id,
+        "name": teacher.name,
+        "email": teacher.email,
+        "personal": serialize_personal_info(teacher.personal),
+        "info": serialize_teacher_info(teacher.info),
+        "contacts": {
+            "teacher_id": teacher.contacts.teacher_id,
+            "phone": teacher.contacts.phone,
+            "whatsapp_number": teacher.contacts.whatsapp_number,
+            "secondary_phone": teacher.contacts.secondary_phone,
+        } if teacher.contacts else None,
+        "schools": [serialize_school_record(s) for s in teacher.schools],
+        "colleges": [serialize_school_record(c) for c in teacher.colleges],
+        "universities": [serialize_university(u) for u in teacher.universities],
+        "preferences": [serialize_preference(p) for p in teacher.preferences],
+        "teaching_type_preferences": [serialize_teaching_type_preference(p) for p in teacher.teaching_type_preferences],
+        "admission_preferences": [serialize_admission_preference(p) for p in teacher.admission_preferences],
+        "preferred_areas": [serialize_preferred_area(a) for a in teacher.preferred_areas],
+    }
+
+
+@router.get("/teachers")
+def list_teachers(db: Session = Depends(get_db)):
+    teachers = db.query(Teacher).options(
+        selectinload(Teacher.personal),
+        selectinload(Teacher.info),
+        selectinload(Teacher.contacts),
+        selectinload(Teacher.schools),
+        selectinload(Teacher.colleges),
+        selectinload(Teacher.universities),
+        selectinload(Teacher.teaching_type_preferences),
+        selectinload(Teacher.admission_preferences),
+        selectinload(Teacher.preferred_areas),
+        selectinload(Teacher.preferences).selectinload(Preferences.preferred_subjects),
+        selectinload(Teacher.preferences).selectinload(Preferences.preferred_tuition_types),
+        selectinload(Teacher.preferences).selectinload(Preferences.preferred_time_slots),
+    ).all()
+    return [serialize_teacher(teacher) for teacher in teachers]
+
+
 @router.get("/teachers/{teacher_id}")
 def get_teacher(teacher_id: int, db: Session = Depends(get_db)):
     teacher = db.query(Teacher).options(
