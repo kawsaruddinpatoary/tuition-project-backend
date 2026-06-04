@@ -143,16 +143,42 @@ class TuitionTypeResponse(TuitionTypeCreate):
     class Config:
         orm_mode = True
 
-# classes
-class ClassCreate(BaseModel):
-    class_: str
+# Admission Type
+class AdmissionTypeCreate(BaseModel):
+    admission_type: str
 
-class ClassResponse(ClassCreate):
+class AdmissionTypeResponse(AdmissionTypeCreate):
     id: int
-    class_: str
+    admission_type: str
 
     class Config:
         orm_mode = True
+
+# Teaching Type
+class TeachingTypeCreate(BaseModel):
+    teaching_type: str
+
+class TeachingTypeResponse(TeachingTypeCreate):
+    id: int
+    teaching_type: str
+
+    class Config:
+        orm_mode = True
+
+# classes
+class ClassCreate(BaseModel):
+    class_name: str
+
+    class Config:
+        fields = {"class_name": "class_"}
+
+class ClassResponse(BaseModel):
+    id: int
+    class_name: str
+
+    class Config:
+        orm_mode = True
+        fields = {"class_name": "class_"}
         
 # addresses
 class AddressCreate(BaseModel):

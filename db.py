@@ -6,7 +6,7 @@ user = 'root'
 password = 'root'
 host = 'localhost'
 port = '3306'
-database = 'tuition-house'
+database = 'tuition_house'
 DATABASE_URL = f'mysql+pymysql://{user}:{password}@{host}:{port}/{database}'
 
 #create engine
