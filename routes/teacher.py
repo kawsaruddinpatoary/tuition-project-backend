@@ -5,7 +5,7 @@ from db import get_db
 from models.teachers import Teacher, PersonalInfo, TeacherInfo, Contacts, Schools, Colleges, Universities
 from models.teacher_utils import Preferences, PreferredSubjects, PreferredTuitionTypes, PreferredTimeSlots
 from models.teacher_utils import TeachingTypePreferences, AdmissionPreferences, PreferredAreas
-from schemas.teachers import (PersonalInfoCreate, TeacherInfoCreate, ContactsCreate, 
+from schemas.teachers import (TeacherCreate, PersonalInfoCreate, TeacherInfoCreate, ContactsCreate, 
                               SchoolCreateInput, SchoolResponse, CollegeCreateInput, CollegeResponse, 
                               UniversityCreateInput, UniversityResponse)
 from schemas.teacher_utils import (PreferenceCreateInput, PreferenceResponse, 
@@ -439,3 +439,229 @@ def add_preferred_areas(teacher_id: int, areas: list[PreferredAreaInput], db: Se
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+
+
+# Teacher update endpoint
+@router.put("/teachers/{teacher_id}")
+def update_teacher(teacher_id: int, payload: TeacherCreate, db: Session = Depends(get_db)):
+    teacher = db.query(Teacher).filter(Teacher.id == teacher_id).first()
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    try:
+        teacher.name = payload.name
+        teacher.email = payload.email
+        db.commit()
+        return {"id": teacher.id, "name": teacher.name, "email": teacher.email}
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Email already exists")
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/personal")
+def update_personal_info(teacher_id: int, payload: PersonalInfoCreate, db: Session = Depends(get_db)):
+    personal = db.query(PersonalInfo).filter(PersonalInfo.teacher_id == teacher_id).first()
+    if not personal:
+        raise HTTPException(status_code=404, detail="Personal info not found")
+    try:
+        for key, value in payload.dict().items():
+            setattr(personal, key, value)
+        db.commit()
+        return {"message": "Personal info updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/info")
+def update_teacher_info(teacher_id: int, payload: TeacherInfoCreate, db: Session = Depends(get_db)):
+    info = db.query(TeacherInfo).filter(TeacherInfo.teacher_id == teacher_id).first()
+    if not info:
+        raise HTTPException(status_code=404, detail="Teacher info not found")
+    try:
+        for key, value in payload.dict().items():
+            setattr(info, key, value)
+        db.commit()
+        return {"message": "Teacher info updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/contacts")
+def update_contacts(teacher_id: int, payload: ContactsCreate, db: Session = Depends(get_db)):
+    contacts = db.query(Contacts).filter(Contacts.teacher_id == teacher_id).first()
+    if not contacts:
+        raise HTTPException(status_code=404, detail="Contacts not found")
+    try:
+        for key, value in payload.dict().items():
+            setattr(contacts, key, value)
+        db.commit()
+        return {"message": "Contacts updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/schools/{school_id}")
+def update_school(teacher_id: int, school_id: int, payload: SchoolCreateInput, db: Session = Depends(get_db)):
+    school = db.query(Schools).filter(Schools.id == school_id, Schools.teacher_id == teacher_id).first()
+    if not school:
+        raise HTTPException(status_code=404, detail="School not found")
+    try:
+        for key, value in payload.dict().items():
+            setattr(school, key, value)
+        db.commit()
+        return {"id": school.id, "message": "School record updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/colleges/{college_id}")
+def update_college(teacher_id: int, college_id: int, payload: CollegeCreateInput, db: Session = Depends(get_db)):
+    college = db.query(Colleges).filter(Colleges.id == college_id, Colleges.teacher_id == teacher_id).first()
+    if not college:
+        raise HTTPException(status_code=404, detail="College not found")
+    try:
+        for key, value in payload.dict().items():
+            setattr(college, key, value)
+        db.commit()
+        return {"id": college.id, "message": "College record updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/universities/{university_id}")
+def update_university(teacher_id: int, university_id: int, payload: UniversityCreateInput, db: Session = Depends(get_db)):
+    university = db.query(Universities).filter(Universities.id == university_id, Universities.teacher_id == teacher_id).first()
+    if not university:
+        raise HTTPException(status_code=404, detail="University not found")
+    try:
+        for key, value in payload.dict().items():
+            setattr(university, key, value)
+        db.commit()
+        return {"id": university.id, "message": "University record updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/preferences/{preference_id}")
+def update_preferences(teacher_id: int, preference_id: int, payload: PreferenceCreateInput, db: Session = Depends(get_db)):
+    pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
+    if not pref:
+        raise HTTPException(status_code=404, detail="Preference not found for this teacher")
+    try:
+        for key, value in payload.dict().items():
+            setattr(pref, key, value)
+        db.commit()
+        return {"id": pref.id, "message": "Preferences updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/preferences/{preference_id}/subjects")
+def update_preferred_subjects(teacher_id: int, preference_id: int, subjects: list[PreferredSubjectInput], db: Session = Depends(get_db)):
+    pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
+    if not pref:
+        raise HTTPException(status_code=404, detail="Preference not found for this teacher")
+    try:
+        db.query(PreferredSubjects).filter(PreferredSubjects.preference_id == pref.id).delete()
+        for subj in subjects:
+            db.add(PreferredSubjects(preference_id=pref.id, **subj.dict()))
+        db.commit()
+        return {"message": f"{len(subjects)} preferred subject(s) updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/preferences/{preference_id}/tuition-types")
+def update_preferred_tuition_types(teacher_id: int, preference_id: int, tuition_types: list[PreferredTuitionTypeInput], db: Session = Depends(get_db)):
+    pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
+    if not pref:
+        raise HTTPException(status_code=404, detail="Preference not found for this teacher")
+    try:
+        db.query(PreferredTuitionTypes).filter(PreferredTuitionTypes.preference_id == pref.id).delete()
+        for tt in tuition_types:
+            db.add(PreferredTuitionTypes(preference_id=pref.id, **tt.dict()))
+        db.commit()
+        return {"message": f"{len(tuition_types)} preferred tuition type(s) updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/preferences/{preference_id}/time-slots")
+def update_preferred_time_slots(teacher_id: int, preference_id: int, time_slots: list[PreferredTimeSlotInput], db: Session = Depends(get_db)):
+    pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
+    if not pref:
+        raise HTTPException(status_code=404, detail="Preference not found for this teacher")
+    try:
+        db.query(PreferredTimeSlots).filter(PreferredTimeSlots.preference_id == pref.id).delete()
+        for ts in time_slots:
+            db.add(PreferredTimeSlots(preference_id=pref.id, **ts.dict()))
+        db.commit()
+        return {"message": f"{len(time_slots)} preferred time slot(s) updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/teaching-type-preferences")
+def update_teaching_type_preferences(teacher_id: int, preferences: list[TeachingTypePreferenceInput], db: Session = Depends(get_db)):
+    if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    try:
+        db.query(TeachingTypePreferences).filter(TeachingTypePreferences.teacher_id == teacher_id).delete()
+        for pref in preferences:
+            db.add(TeachingTypePreferences(teacher_id=teacher_id, **pref.dict()))
+        db.commit()
+        return {"message": f"{len(preferences)} teaching type preference(s) updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/admission-preferences")
+def update_admission_preferences(teacher_id: int, preferences: list[AdmissionPreferenceInput], db: Session = Depends(get_db)):
+    if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    try:
+        db.query(AdmissionPreferences).filter(AdmissionPreferences.teacher_id == teacher_id).delete()
+        for pref in preferences:
+            db.add(AdmissionPreferences(teacher_id=teacher_id, **pref.dict()))
+        db.commit()
+        return {"message": f"{len(preferences)} admission preference(s) updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/teachers/{teacher_id}/preferred-areas")
+def update_preferred_areas(teacher_id: int, areas: list[PreferredAreaInput], db: Session = Depends(get_db)):
+    if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    try:
+        db.query(PreferredAreas).filter(PreferredAreas.teacher_id == teacher_id).delete()
+        for area in areas:
+            db.add(PreferredAreas(teacher_id=teacher_id, **area.dict()))
+        db.commit()
+        return {"message": f"{len(areas)} preferred area(s) updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/teachers/{teacher_id}", status_code=204)
+def delete_teacher(teacher_id: int, db: Session = Depends(get_db)):
+    teacher = db.query(Teacher).filter(Teacher.id == teacher_id).first()
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    db.delete(teacher)
+    db.commit()
