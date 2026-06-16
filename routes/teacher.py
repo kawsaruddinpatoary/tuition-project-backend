@@ -12,7 +12,7 @@ from schemas.teacher_utils import (PreferenceCreateInput, PreferenceResponse,
                                    TeachingTypePreferenceInput, AdmissionPreferenceInput, PreferredAreaInput,
                                    PreferredSubjectInput, PreferredTuitionTypeInput, PreferredTimeSlotInput)
 
-router = APIRouter()
+router = APIRouter(prefix="/teachers", tags=["teachers"])
 
 
 def serialize_address(address):
@@ -153,7 +153,7 @@ def serialize_teacher(teacher):
     }
 
 
-@router.get("/teachers")
+@router.get("")
 def list_teachers(db: Session = Depends(get_db)):
     teachers = db.query(Teacher).options(
         selectinload(Teacher.personal),
@@ -172,7 +172,7 @@ def list_teachers(db: Session = Depends(get_db)):
     return [serialize_teacher(teacher) for teacher in teachers]
 
 
-@router.get("/teachers/{teacher_id}")
+@router.get("/{teacher_id}")
 def get_teacher(teacher_id: int, db: Session = Depends(get_db)):
     teacher = db.query(Teacher).options(
         selectinload(Teacher.personal),
@@ -213,7 +213,7 @@ def get_teacher(teacher_id: int, db: Session = Depends(get_db)):
     }
 
 # Main teacher creation (name + email only)
-@router.post("/teachers", status_code=201)
+@router.post("", status_code=201)
 def create_teacher(name: str, email: str, db: Session = Depends(get_db)):
     try:
         t = Teacher(name=name, email=email)
@@ -228,7 +228,7 @@ def create_teacher(name: str, email: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 # Personal info endpoint
-@router.post("/teachers/{teacher_id}/personal")
+@router.post("/{teacher_id}/personal")
 def add_personal_info(teacher_id: int, payload: PersonalInfoCreate, db: Session = Depends(get_db)):
     try:
         if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
@@ -248,7 +248,7 @@ def add_personal_info(teacher_id: int, payload: PersonalInfoCreate, db: Session 
         raise HTTPException(status_code=400, detail=str(e))
 
 # Teacher info endpoint
-@router.post("/teachers/{teacher_id}/info")
+@router.post("/{teacher_id}/info")
 def add_teacher_info(teacher_id: int, payload: TeacherInfoCreate, db: Session = Depends(get_db)):
     try:
         if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
@@ -268,7 +268,7 @@ def add_teacher_info(teacher_id: int, payload: TeacherInfoCreate, db: Session = 
         raise HTTPException(status_code=400, detail=str(e))
 
 # Contacts endpoint
-@router.post("/teachers/{teacher_id}/contacts")
+@router.post("/{teacher_id}/contacts")
 def add_contacts(teacher_id: int, payload: ContactsCreate, db: Session = Depends(get_db)):
     try:
         if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
@@ -288,7 +288,7 @@ def add_contacts(teacher_id: int, payload: ContactsCreate, db: Session = Depends
         raise HTTPException(status_code=400, detail=str(e))
 
 # School endpoint
-@router.post("/teachers/{teacher_id}/schools")
+@router.post("/{teacher_id}/schools")
 def add_school(teacher_id: int, payload: SchoolCreateInput, db: Session = Depends(get_db)):
     try:
         if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
@@ -303,7 +303,7 @@ def add_school(teacher_id: int, payload: SchoolCreateInput, db: Session = Depend
         raise HTTPException(status_code=400, detail=str(e))
 
 # College endpoint
-@router.post("/teachers/{teacher_id}/colleges")
+@router.post("/{teacher_id}/colleges")
 def add_college(teacher_id: int, payload: CollegeCreateInput, db: Session = Depends(get_db)):
     try:
         if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
@@ -318,7 +318,7 @@ def add_college(teacher_id: int, payload: CollegeCreateInput, db: Session = Depe
         raise HTTPException(status_code=400, detail=str(e))
 
 # University endpoint
-@router.post("/teachers/{teacher_id}/universities")
+@router.post("/{teacher_id}/universities")
 def add_university(teacher_id: int, payload: UniversityCreateInput, db: Session = Depends(get_db)):
     try:
         if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
@@ -333,7 +333,7 @@ def add_university(teacher_id: int, payload: UniversityCreateInput, db: Session 
         raise HTTPException(status_code=400, detail=str(e))
 
 # Preferences endpoint
-@router.post("/teachers/{teacher_id}/preferences")
+@router.post("/{teacher_id}/preferences")
 def add_preferences(teacher_id: int, payload: PreferenceCreateInput, db: Session = Depends(get_db)):
     try:
         if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
@@ -348,7 +348,7 @@ def add_preferences(teacher_id: int, payload: PreferenceCreateInput, db: Session
         raise HTTPException(status_code=400, detail=str(e))
 
 # Preferred subjects endpoint
-@router.post("/teachers/{teacher_id}/preferences/{preference_id}/subjects")
+@router.post("/{teacher_id}/preferences/{preference_id}/subjects")
 def add_preferred_subjects(teacher_id: int, preference_id: int, subjects: list[PreferredSubjectInput], db: Session = Depends(get_db)):
     try:
         pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
@@ -364,7 +364,7 @@ def add_preferred_subjects(teacher_id: int, preference_id: int, subjects: list[P
         raise HTTPException(status_code=400, detail=str(e))
 
 # Preferred tuition types endpoint
-@router.post("/teachers/{teacher_id}/preferences/{preference_id}/tuition-types")
+@router.post("/{teacher_id}/preferences/{preference_id}/tuition-types")
 def add_preferred_tuition_types(teacher_id: int, preference_id: int, tuition_types: list[PreferredTuitionTypeInput], db: Session = Depends(get_db)):
     try:
         pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
@@ -380,7 +380,7 @@ def add_preferred_tuition_types(teacher_id: int, preference_id: int, tuition_typ
         raise HTTPException(status_code=400, detail=str(e))
 
 # Preferred time slots endpoint
-@router.post("/teachers/{teacher_id}/preferences/{preference_id}/time-slots")
+@router.post("/{teacher_id}/preferences/{preference_id}/time-slots")
 def add_preferred_time_slots(teacher_id: int, preference_id: int, time_slots: list[PreferredTimeSlotInput], db: Session = Depends(get_db)):
     try:
         pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
@@ -396,7 +396,7 @@ def add_preferred_time_slots(teacher_id: int, preference_id: int, time_slots: li
         raise HTTPException(status_code=400, detail=str(e))
 
 # Teaching type preferences endpoint
-@router.post("/teachers/{teacher_id}/teaching-type-preferences")
+@router.post("/{teacher_id}/teaching-type-preferences")
 def add_teaching_type_preferences(teacher_id: int, preferences: list[TeachingTypePreferenceInput], db: Session = Depends(get_db)):
     try:
         if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
@@ -411,7 +411,7 @@ def add_teaching_type_preferences(teacher_id: int, preferences: list[TeachingTyp
         raise HTTPException(status_code=400, detail=str(e))
 
 # Admission preferences endpoint
-@router.post("/teachers/{teacher_id}/admission-preferences")
+@router.post("/{teacher_id}/admission-preferences")
 def add_admission_preferences(teacher_id: int, preferences: list[AdmissionPreferenceInput], db: Session = Depends(get_db)):
     try:
         if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
@@ -426,7 +426,7 @@ def add_admission_preferences(teacher_id: int, preferences: list[AdmissionPrefer
         raise HTTPException(status_code=400, detail=str(e))
 
 # Preferred areas endpoint
-@router.post("/teachers/{teacher_id}/preferred-areas")
+@router.post("/{teacher_id}/preferred-areas")
 def add_preferred_areas(teacher_id: int, areas: list[PreferredAreaInput], db: Session = Depends(get_db)):
     try:
         if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
@@ -442,7 +442,7 @@ def add_preferred_areas(teacher_id: int, areas: list[PreferredAreaInput], db: Se
 
 
 # Teacher update endpoint
-@router.put("/teachers/{teacher_id}")
+@router.put("/{teacher_id}")
 def update_teacher(teacher_id: int, payload: TeacherCreate, db: Session = Depends(get_db)):
     teacher = db.query(Teacher).filter(Teacher.id == teacher_id).first()
     if not teacher:
@@ -460,7 +460,7 @@ def update_teacher(teacher_id: int, payload: TeacherCreate, db: Session = Depend
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/personal")
+@router.put("/{teacher_id}/personal")
 def update_personal_info(teacher_id: int, payload: PersonalInfoCreate, db: Session = Depends(get_db)):
     personal = db.query(PersonalInfo).filter(PersonalInfo.teacher_id == teacher_id).first()
     if not personal:
@@ -475,7 +475,7 @@ def update_personal_info(teacher_id: int, payload: PersonalInfoCreate, db: Sessi
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/info")
+@router.put("/{teacher_id}/info")
 def update_teacher_info(teacher_id: int, payload: TeacherInfoCreate, db: Session = Depends(get_db)):
     info = db.query(TeacherInfo).filter(TeacherInfo.teacher_id == teacher_id).first()
     if not info:
@@ -490,7 +490,7 @@ def update_teacher_info(teacher_id: int, payload: TeacherInfoCreate, db: Session
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/contacts")
+@router.put("/{teacher_id}/contacts")
 def update_contacts(teacher_id: int, payload: ContactsCreate, db: Session = Depends(get_db)):
     contacts = db.query(Contacts).filter(Contacts.teacher_id == teacher_id).first()
     if not contacts:
@@ -505,7 +505,7 @@ def update_contacts(teacher_id: int, payload: ContactsCreate, db: Session = Depe
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/schools/{school_id}")
+@router.put("/{teacher_id}/schools/{school_id}")
 def update_school(teacher_id: int, school_id: int, payload: SchoolCreateInput, db: Session = Depends(get_db)):
     school = db.query(Schools).filter(Schools.id == school_id, Schools.teacher_id == teacher_id).first()
     if not school:
@@ -520,7 +520,7 @@ def update_school(teacher_id: int, school_id: int, payload: SchoolCreateInput, d
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/colleges/{college_id}")
+@router.put("/{teacher_id}/colleges/{college_id}")
 def update_college(teacher_id: int, college_id: int, payload: CollegeCreateInput, db: Session = Depends(get_db)):
     college = db.query(Colleges).filter(Colleges.id == college_id, Colleges.teacher_id == teacher_id).first()
     if not college:
@@ -535,7 +535,7 @@ def update_college(teacher_id: int, college_id: int, payload: CollegeCreateInput
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/universities/{university_id}")
+@router.put("/{teacher_id}/universities/{university_id}")
 def update_university(teacher_id: int, university_id: int, payload: UniversityCreateInput, db: Session = Depends(get_db)):
     university = db.query(Universities).filter(Universities.id == university_id, Universities.teacher_id == teacher_id).first()
     if not university:
@@ -550,7 +550,7 @@ def update_university(teacher_id: int, university_id: int, payload: UniversityCr
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/preferences/{preference_id}")
+@router.put("/{teacher_id}/preferences/{preference_id}")
 def update_preferences(teacher_id: int, preference_id: int, payload: PreferenceCreateInput, db: Session = Depends(get_db)):
     pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
     if not pref:
@@ -565,7 +565,7 @@ def update_preferences(teacher_id: int, preference_id: int, payload: PreferenceC
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/preferences/{preference_id}/subjects")
+@router.put("/{teacher_id}/preferences/{preference_id}/subjects")
 def update_preferred_subjects(teacher_id: int, preference_id: int, subjects: list[PreferredSubjectInput], db: Session = Depends(get_db)):
     pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
     if not pref:
@@ -581,7 +581,7 @@ def update_preferred_subjects(teacher_id: int, preference_id: int, subjects: lis
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/preferences/{preference_id}/tuition-types")
+@router.put("/{teacher_id}/preferences/{preference_id}/tuition-types")
 def update_preferred_tuition_types(teacher_id: int, preference_id: int, tuition_types: list[PreferredTuitionTypeInput], db: Session = Depends(get_db)):
     pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
     if not pref:
@@ -597,7 +597,7 @@ def update_preferred_tuition_types(teacher_id: int, preference_id: int, tuition_
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/preferences/{preference_id}/time-slots")
+@router.put("/{teacher_id}/preferences/{preference_id}/time-slots")
 def update_preferred_time_slots(teacher_id: int, preference_id: int, time_slots: list[PreferredTimeSlotInput], db: Session = Depends(get_db)):
     pref = db.query(Preferences).filter(Preferences.id == preference_id, Preferences.teacher_id == teacher_id).first()
     if not pref:
@@ -613,7 +613,7 @@ def update_preferred_time_slots(teacher_id: int, preference_id: int, time_slots:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/teaching-type-preferences")
+@router.put("/{teacher_id}/teaching-type-preferences")
 def update_teaching_type_preferences(teacher_id: int, preferences: list[TeachingTypePreferenceInput], db: Session = Depends(get_db)):
     if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
         raise HTTPException(status_code=404, detail="Teacher not found")
@@ -628,7 +628,7 @@ def update_teaching_type_preferences(teacher_id: int, preferences: list[Teaching
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/admission-preferences")
+@router.put("/{teacher_id}/admission-preferences")
 def update_admission_preferences(teacher_id: int, preferences: list[AdmissionPreferenceInput], db: Session = Depends(get_db)):
     if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
         raise HTTPException(status_code=404, detail="Teacher not found")
@@ -643,7 +643,7 @@ def update_admission_preferences(teacher_id: int, preferences: list[AdmissionPre
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/teachers/{teacher_id}/preferred-areas")
+@router.put("/{teacher_id}/preferred-areas")
 def update_preferred_areas(teacher_id: int, areas: list[PreferredAreaInput], db: Session = Depends(get_db)):
     if not db.query(Teacher).filter(Teacher.id == teacher_id).first():
         raise HTTPException(status_code=404, detail="Teacher not found")
@@ -658,7 +658,7 @@ def update_preferred_areas(teacher_id: int, areas: list[PreferredAreaInput], db:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/teachers/{teacher_id}", status_code=204)
+@router.delete("/{teacher_id}", status_code=204)
 def delete_teacher(teacher_id: int, db: Session = Depends(get_db)):
     teacher = db.query(Teacher).filter(Teacher.id == teacher_id).first()
     if not teacher:

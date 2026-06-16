@@ -41,7 +41,7 @@ class PersonalInfoResponse(PersonalInfo):
 class TeacherInfoCreate(BaseModel):
     group: int
     medium: int
-    curriculum: int
+    curriculum: Optional[int] = None
 
 # Teacher Info - Full schema with teacher_id
 class TeacherInfo(TeacherInfoCreate):
@@ -65,7 +65,7 @@ class SchoolCreateInput(BaseModel):
     board: int
     group: int
     medium: int
-    curriculum: int
+    curriculum: Optional[int] = None
 
 # School - Full schema with teacher_id
 class SchoolCreate(SchoolCreateInput):
@@ -85,7 +85,7 @@ class CollegeCreateInput(BaseModel):
     board: int
     group: int
     medium: int
-    curriculum: int
+    curriculum: Optional[int] = None
 
 # College - Full schema with teacher_id
 class CollegeCreate(CollegeCreateInput):

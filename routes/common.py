@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from db import get_db
-from models.common import (Areas, EducationLevels, Boards, Groups, Mediums, Curriculums, Subjects,
+from models.common import (Areas, EducationLevels, Boards, Groups, InstituteTypes, Mediums, Curriculums, Relationships, Subjects,
                            Departments, Genders, Religions, BloodGroups, TuitionTypes, TimeSlots, Classes, Addresses)
 from models.teacher_utils import AdmissionTypes, TeachingTypes
 from schemas.common import (AreaCreate, AreaResponse, EducationLevelCreate, EducationLevelResponse,
-                            BoardCreate, BoardResponse, GroupCreate, GroupResponse, MediumCreate, MediumResponse,
-                            CurriculumCreate, CurriculumResponse, SubjectCreate, SubjectResponse,
+                            BoardCreate, BoardResponse, GroupCreate, GroupResponse, InstituteTypeCreate, InstituteTypeCreate, InstituteTypeResponse, MediumCreate, MediumResponse,
+                            CurriculumCreate, CurriculumResponse, RelationshipCreate, RelationshipResponse, SubjectCreate, SubjectResponse,
                             DepartmentCreate, DepartmentResponse, GenderCreate, GenderResponse,
                             ReligionCreate, ReligionResponse, BloodGroupCreate, BloodGroupResponse,
                             TuitionTypeCreate, TuitionTypeResponse, AdmissionTypeCreate, AdmissionTypeResponse,
@@ -490,4 +490,59 @@ def delete_address(address_id: int, db: Session = Depends(get_db)):
     if not address:
         raise HTTPException(status_code=404, detail="Address not found")
     db.delete(address)
+    db.commit()
+
+  
+@router.get("/institute-types", response_model=List[InstituteTypeResponse])
+def get_institute_types(db: Session = Depends(get_db)):
+    itypes = db.query(InstituteTypes).all()
+    return itypes
+
+@router.get("/institute-types/{institute_type_id}", response_model=InstituteTypeResponse)
+def get_institute_type(institute_type_id: int, db: Session = Depends(get_db)):
+    itype = db.query(InstituteTypes).filter(InstituteTypes.id == institute_type_id).first()
+    if not itype:
+        raise HTTPException(status_code=404, detail="Institute type not found")
+    return itype
+
+@router.post("/institute-types", response_model=InstituteTypeResponse, status_code=201)
+def create_institute_type(payload: InstituteTypeCreate, db: Session = Depends(get_db)):
+    itype = InstituteTypes(**payload.dict())
+    db.add(itype)
+    db.commit()
+    return itype
+
+@router.delete("/institute-types/{institute_type_id}", status_code=204)
+def delete_institute_type(institute_type_id: int, db: Session = Depends(get_db)):
+    itype = db.query(InstituteTypes).filter(InstituteTypes.id == institute_type_id).first()
+    if not itype:
+        raise HTTPException(status_code=404, detail="Institute type not found")
+    db.delete(itype)
+    db.commit()
+
+@router.get("/relationships", response_model=List[RelationshipResponse])
+def get_relationships(db: Session = Depends(get_db)):
+    relationships = db.query(Relationships).all()
+    return relationships
+
+@router.get("/relationships/{relationship_id}", response_model=RelationshipResponse)
+def get_relationship(relationship_id: int, db: Session = Depends(get_db)):
+    relationship = db.query(Relationships).filter(Relationships.id == relationship_id).first()
+    if not relationship:
+        raise HTTPException(status_code=404, detail="Relationship not found")
+    return relationship
+
+@router.post("/relationships", response_model=RelationshipResponse, status_code=201)
+def create_relationship(payload: RelationshipCreate, db: Session = Depends(get_db)):
+    relationship = Relationships(**payload.dict())
+    db.add(relationship)
+    db.commit()
+    return relationship
+
+@router.delete("/relationships/{relationship_id}", status_code=204)
+def delete_relationship(relationship_id: int, db: Session = Depends(get_db)):
+    relationship = db.query(Relationships).filter(Relationships.id == relationship_id).first()
+    if not relationship:
+        raise HTTPException(status_code=404, detail="Relationship not found")
+    db.delete(relationship)
     db.commit()

@@ -98,3 +98,15 @@ class Addresses(Base):
     building = Column(String(50), nullable=False)
     full_address = Column(String(255), nullable=False)
 
+# Related with only jobs
+class InstituteTypes(Base):
+    __tablename__ = 'institute_types'
+
+    id = Column(Integer, primary_key=True, index=True)
+    institute_type = Column(String(50), nullable=False)
+
+class Relationships(Base):
+    __tablename__ = 'relationships'
+
+    id = Column(Integer, primary_key=True, index=True)
+    relationship = Column(String(50), nullable=False)

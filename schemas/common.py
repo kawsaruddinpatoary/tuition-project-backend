@@ -200,3 +200,23 @@ class AddressResponse(AddressCreate):
 
     class Config:
         orm_mode = True
+
+class InstituteTypeCreate(BaseModel):
+    institute_type: str
+
+class InstituteTypeResponse(InstituteTypeCreate):
+    id: int
+    institute_type: str
+
+    class Config:
+        orm_mode = True
+
+class RelationshipCreate(BaseModel):
+    relationship: str
+
+class RelationshipResponse(RelationshipCreate):
+    id: int
+    relationship: str
+
+    class Config:
+        orm_mode = True

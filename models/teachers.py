@@ -47,7 +47,7 @@ class TeacherInfo(Base):
     teacher_id = Column(Integer, ForeignKey('teachers.id', ondelete='CASCADE'), primary_key=True, nullable=False)
     group = Column(Integer, ForeignKey('groups.id'), nullable=False)
     medium = Column(Integer, ForeignKey('mediums.id'), nullable=False)
-    curriculum = Column(Integer, ForeignKey('curriculums.id'), nullable=False)
+    curriculum = Column(Integer, ForeignKey('curriculums.id'), nullable=True)
     teacher = relationship("Teacher", back_populates="info")
     group_rel = relationship("Groups")
     medium_rel = relationship("Mediums")
