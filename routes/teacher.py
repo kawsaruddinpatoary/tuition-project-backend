@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.exc import IntegrityError
+from auth.dependencies import get_current_user
 from db import get_db
 from models.teachers import Teacher, PersonalInfo, TeacherInfo, Contacts, Schools, Colleges, Universities
 from models.teacher_utils import Preferences, PreferredSubjects, PreferredTuitionTypes, PreferredTimeSlots
@@ -12,7 +13,7 @@ from schemas.teacher_utils import (PreferenceCreateInput, PreferenceResponse,
                                    TeachingTypePreferenceInput, AdmissionPreferenceInput, PreferredAreaInput,
                                    PreferredSubjectInput, PreferredTuitionTypeInput, PreferredTimeSlotInput)
 
-router = APIRouter(prefix="/teachers", tags=["teachers"])
+router = APIRouter(prefix="/teachers", tags=["teachers"], dependencies=[Depends(get_current_user)])
 
 
 def serialize_address(address):

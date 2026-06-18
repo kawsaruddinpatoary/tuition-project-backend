@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from auth.dependencies import get_current_user
 from db import get_db
 from models.common import (Areas, EducationLevels, Boards, Groups, InstituteTypes, Mediums, Curriculums, Relationships, Subjects,
                            Departments, Genders, Religions, BloodGroups, TuitionTypes, TimeSlots, Classes, Addresses)
@@ -14,7 +15,7 @@ from schemas.common import (AreaCreate, AreaResponse, EducationLevelCreate, Educ
                             ClassCreate, ClassResponse, AddressCreate, AddressResponse)
 from typing import List
 
-router = APIRouter(prefix="/commons", tags=["Commons"])
+router = APIRouter(prefix="/commons", tags=["Commons"], dependencies=[Depends(get_current_user)])
 
 # ==================== AREAS ====================
 @router.get("/areas", response_model=List[AreaResponse])

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, selectinload
 from typing import List
+from auth.dependencies import get_current_user
 from db import get_db
 from models.common import (Areas, EducationLevels, Boards, Groups, InstituteTypes, Mediums, Curriculums, Relationships, Subjects)
 from models.job import Jobs, JobInfo, JobPreferences, SubjectJobPreferences
@@ -10,7 +11,7 @@ from schemas.common import (AreaCreate, AreaResponse, EducationLevelCreate, Educ
                             RelationshipResponse, SubjectCreate, SubjectResponse)
 from schemas.job import (JobCreate, JobCreateResponse, JobInfoCreate, JobPreferencesCreate, JobPreferencesResponse, JobResponse, SubjectJobPreferenceCreate)
 
-router = APIRouter(prefix="/jobs", tags=["jobs"])
+router = APIRouter(prefix="/jobs", tags=["jobs"], dependencies=[Depends(get_current_user)])
 
 def serialize_address(address):
     if not address:
