@@ -97,6 +97,12 @@ class Addresses(Base):
     road = Column(String(50), nullable=False)
     building = Column(String(50), nullable=False)
     full_address = Column(String(255), nullable=False)
+    
+class Roles(Base):
+    __tablename__ = 'roles'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    role = Column(String(20), unique=True, nullable=False)
 
 # Related with only jobs
 class InstituteTypes(Base):

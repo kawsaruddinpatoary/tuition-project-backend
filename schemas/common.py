@@ -201,6 +201,15 @@ class AddressResponse(AddressCreate):
     class Config:
         orm_mode = True
 
+class RoleCreate(BaseModel):
+    role: str
+
+class RoleResponse(RoleCreate):
+    id: int
+    
+    class Config:
+        from_attributes: True
+
 class InstituteTypeCreate(BaseModel):
     institute_type: str
 

@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from auth.dependencies import get_current_user
 from db import get_db
-from models.common import (Areas, EducationLevels, Boards, Groups, InstituteTypes, Mediums, Curriculums, Relationships, Subjects,
+from models.common import (Areas, EducationLevels, Boards, Groups, InstituteTypes, Mediums, Curriculums, Relationships, Roles, Subjects,
                            Departments, Genders, Religions, BloodGroups, TuitionTypes, TimeSlots, Classes, Addresses)
 from models.teacher_utils import AdmissionTypes, TeachingTypes
 from schemas.common import (AreaCreate, AreaResponse, EducationLevelCreate, EducationLevelResponse,
                             BoardCreate, BoardResponse, GroupCreate, GroupResponse, InstituteTypeCreate, InstituteTypeCreate, InstituteTypeResponse, MediumCreate, MediumResponse,
-                            CurriculumCreate, CurriculumResponse, RelationshipCreate, RelationshipResponse, SubjectCreate, SubjectResponse,
+                            CurriculumCreate, CurriculumResponse, RelationshipCreate, RelationshipResponse, RoleCreate, RoleResponse, SubjectCreate, SubjectResponse,
                             DepartmentCreate, DepartmentResponse, GenderCreate, GenderResponse,
                             ReligionCreate, ReligionResponse, BloodGroupCreate, BloodGroupResponse,
                             TuitionTypeCreate, TuitionTypeResponse, AdmissionTypeCreate, AdmissionTypeResponse,
@@ -491,6 +491,33 @@ def delete_address(address_id: int, db: Session = Depends(get_db)):
     if not address:
         raise HTTPException(status_code=404, detail="Address not found")
     db.delete(address)
+    db.commit()
+    
+@router.get('/roles', response_model=List[RoleResponse])
+def get_all_roles(db: Session = Depends(get_db)):
+    roles = db.query(Roles).all()
+    return roles
+
+@router.get("/roles/{role_id}", response_model=RoleResponse)
+def get_roles(role_id: int, db: Session = Depends(get_db)):
+    role = db.query(Roles).filter(Roles.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    return role
+
+@router.post("/roles", response_model=RoleResponse, status_code=201)
+def create_roles(payload: RoleCreate, db: Session = Depends(get_db)):
+    role = Roles(**payload.dict())
+    db.add(role)
+    db.commit()
+    return role
+
+@router.delete("/roles/{role_id}", status_code=204)
+def delete_role(role_id: int, db: Session = Depends(get_db)):
+    role = db.query(Roles).filter(Roles.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    db.delete(role)
     db.commit()
 
   
