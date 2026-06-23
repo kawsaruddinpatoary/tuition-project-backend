@@ -9,6 +9,10 @@ class Teacher(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
+    phone = Column(String(20), nullable=False)
+    
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    user = relationship("User", back_populates="teacher_profile")
     personal = relationship("PersonalInfo", uselist=False, back_populates="teacher", cascade="all, delete-orphan")
     info = relationship("TeacherInfo", uselist=False, back_populates="teacher", cascade="all, delete-orphan")
     contacts = relationship("Contacts", uselist=False, back_populates="teacher", cascade="all, delete-orphan")
